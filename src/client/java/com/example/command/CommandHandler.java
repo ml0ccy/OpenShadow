@@ -1,20 +1,18 @@
 package com.example.command;
 
 import com.example.modules.GlowModule;
+import com.example.modules.SprintModule;
 import net.minecraft.client.Minecraft;
 import net.minecraft.network.chat.Component;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.Style;
 
 public class CommandHandler {
 
-    // For answers client in chat
     private static final String PREFIX = "§8[§5client§8]§r ";
 
     public static void handle(String input) {
         String stripped = input.substring(1).trim();
         if (stripped.isEmpty()) {
-            sendMessage("§7Введите команду. Доступные: §fglow");
+            sendMessage("§7Введите команду. Доступные: §fglow, sprint");
             return;
         }
 
@@ -23,9 +21,9 @@ public class CommandHandler {
 
         switch (command) {
             case "glow" -> handleGlow(args);
+            case "sprint" -> handleSprint(args);
             case "help" -> handleHelp();
-            default -> sendMessage("§cНеизвестная команда: §f" + command
-                    + "§7. Введите §f.help");
+            default -> sendMessage("§cНеизвестная команда: §f" + command + "§7. Введите §f.help");
         }
     }
 
@@ -46,16 +44,37 @@ public class CommandHandler {
                 GlowModule.setEnabled(false);
                 sendMessage("Glow: " + formatBool(false));
             }
-            case "status" -> {
-                sendMessage("Glow: " + formatBool(GlowModule.isEnabled()));
-            }
+            case "status" -> sendMessage("Glow: " + formatBool(GlowModule.isEnabled()));
             default -> sendMessage("§cИспользование: §f.glow §7[on/off/status]");
+        }
+    }
+
+    private static void handleSprint(String[] args) {
+        if (args.length == 1) {
+            SprintModule.toggle();
+            sendMessage("Sprint: " + formatBool(SprintModule.isEnabled()));
+            return;
+        }
+
+        String sub = args[1].toLowerCase();
+        switch (sub) {
+            case "on" -> {
+                SprintModule.setEnabled(true);
+                sendMessage("Sprint: " + formatBool(true));
+            }
+            case "off" -> {
+                SprintModule.setEnabled(false);
+                sendMessage("Sprint: " + formatBool(false));
+            }
+            case "status" -> sendMessage("Sprint: " + formatBool(SprintModule.isEnabled()));
+            default -> sendMessage("§cИспользование: §f.sprint §7[on/off/status]");
         }
     }
 
     private static void handleHelp() {
         sendMessage("§7=== Доступные команды ===");
         sendMessage("§f.glow §7[on/off/status] §8— §7подсветка энтити");
+        sendMessage("§f.sprint §7[on/off/status] §8— §7авто-бег");
         sendMessage("§f.help §8— §7список команд");
     }
 
@@ -65,10 +84,8 @@ public class CommandHandler {
 
     public static void sendMessage(String text) {
         Minecraft mc = Minecraft.getInstance();
-        if (mc.player != null) {
-            mc.player.displayClientMessage(
-                    Component.literal(PREFIX + text), false
-            );
+        if (mc.gui != null) {
+            mc.gui.getChat().addMessage(Component.literal(PREFIX + text));
         }
     }
 }
