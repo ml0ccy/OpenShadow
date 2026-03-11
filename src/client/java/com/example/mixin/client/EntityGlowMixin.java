@@ -13,11 +13,10 @@ public class EntityGlowMixin {
 
     @Inject(method = "isCurrentlyGlowing", at = @At("HEAD"), cancellable = true)
     private void onIsCurrentlyGlowing(CallbackInfoReturnable<Boolean> cir) {
-        if (!GlowModule.enabled) return;
+        if (!GlowModule.isEnabled()) return;
 
         Entity self = (Entity) (Object) this;
 
-        // Dont glow yourself
         if (self == Minecraft.getInstance().player) return;
 
         cir.setReturnValue(true);
